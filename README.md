@@ -1,6 +1,7 @@
 **Application**
 
 [Minecraft Server](https://www.minecraft.net/en-us/download/server/)
+[Forge Server](https://files.minecraftforge.net/)
 
 **Description**
 
@@ -8,7 +9,7 @@ Minecraft is a sandbox video game created by Swedish game developer Markus Perss
 
 **Build notes**
 
-Latest stable Minecraft release from Arch Linux AUR.
+Built for the latest stable Minecraft release with the latest Forge version.
 
 **Usage**
 ```
@@ -24,7 +25,7 @@ docker run -d \
     -e UMASK=<umask for created files> \
     -e PUID=<uid for user> \
     -e PGID=<gid for user> \
-    binhex/arch-minecraftserver
+    gwynethstark/arch-forgeserver
 ```
 
 Please replace all user variables in the above command defined by <> with the correct values.
@@ -37,23 +38,23 @@ docker run -d \
     -v /apps/docker/minecraftserver:/config \
     -v /etc/localtime:/etc/localtime:ro \
     -e MAX_BACKUPS=10 \
-    -e JAVA_INITIAL_HEAP_SIZE=512M \
-    -e JAVA_MAX_HEAP_SIZE=1024M \
+    -e JAVA_INITIAL_HEAP_SIZE=4096M \
+    -e JAVA_MAX_HEAP_SIZE=6144M \
     -e JAVA_MAX_THREADS=1 \
     -e UMASK=000 \
     -e PUID=0 \
     -e PGID=0 \
-    binhex/arch-minecraftserver
+    gwynethstark/arch-forgeserver
 ```
 
 **Notes**
 
-JAVA_INITIAL_HEAP_SIZE value and JAVA_MAX_HEAP_SIZE values must be a multiple of 1024 and greater than 2MB.
+JAVA_INITIAL_HEAP_SIZE value and JAVA_MAX_HEAP_SIZE values must be a multiple of 1024 and greater than 2MB. Recommended is at least 4 gigabytes of memory, meaning 4096M.
 
 If you want to connect to the minecraft server console then issue the following command, use CTRL+a and then press 'd' to disconnect from the session, leaving it running.
 
 ```
-docker exec -u nobody -it <name of container> /usr/bin/minecraftd console
+docker exec -u nobody -it <name of container> /usr/bin/forged console
 ```
 
 User ID (PUID) and Group ID (PGID) can be found by issuing the following command for the user you want to run the container as:-
@@ -62,8 +63,4 @@ User ID (PUID) and Group ID (PGID) can be found by issuing the following command
 id <username>
 ```
 ___
-If you appreciate my work, then please consider buying me a beer  :D
-
-[![PayPal donation](https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MM5E27UX6AUU4)
-
-[Documentation](https://github.com/binhex/documentation) | [Support forum](https://forums.unraid.net/topic/84880-support-binhex-minecraftserver/)
+This project is based on [binhex's minecraftserver](https://github.com/binhex/arch-minecraftserver) Docker package.
