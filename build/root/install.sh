@@ -26,20 +26,19 @@ if [[ ! -z "${pacman_packages}" ]]; then
 	pacman -S --needed $pacman_packages --noconfirm
 fi
 
-# aur packages
-####
+# define minecraft and forge version
+minecraft_version="1.15.2"
+forge_version="31.1.27-1"
 
-# define aur packages
-aur_packages="minecraft-server"
-
-# call aur install script (arch user repo)
-source aur.sh
+# download compiled forge package
+curly.sh -rc 6 -rw 10 -of "/tmp/forge-server-any.pkg.tar.xz" -url "https://github.com/gwynethstark/arch-packages/raw/master/compiled/forge-server-${minecraft_version}_${forge_version}-any.pkg.tar.xz"
+pacman -U "/tmp/forge-server-any.pkg.tar.xz" --noconfirm
 
 # config java minecraft
 ####
 
-# copy config file containing env vars, sourced in from /usr/bin/minecraftd
-cp /home/nobody/minecraft /etc/conf.d/minecraft
+# copy config file containing env vars, sourced in from /usr/bin/forged
+cp /home/nobody/forge /etc/conf.d/forge
 
 # container perms
 ####

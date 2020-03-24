@@ -4,13 +4,13 @@
 # Variables are interpreted in bash. Simply using bash-syntax is sufficient.
 
 # General parameters
-SERVER_ROOT="/config/minecraft"
-BACKUP_DEST="/config/minecraft/backup"
+SERVER_ROOT="/config/forge"
+BACKUP_DEST="/config/mforge/backup"
 BACKUP_PATHS="world" # World paths separated by spaces relative to SERVER_ROOT
 KEEP_BACKUPS="${MAX_BACKUPS}"
 GAME_USER="nobody"
-MAIN_EXECUTABLE="minecraft_server.jar"
-SESSION_NAME="minecraft"
+MAIN_EXECUTABLE="forge.jar"
+SESSION_NAME="forge"
 
 # System parameters for java
 #  -Xms sets the intial heap size (must be a multiple of 1024 and greater than 2MB, no spaces!)

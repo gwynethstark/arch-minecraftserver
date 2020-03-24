@@ -1,5 +1,5 @@
 FROM binhex/arch-base:latest
-MAINTAINER binhex
+LABEL maintainer="GwynethStark"
 
 # additional files
 ##################
@@ -13,7 +13,7 @@ ADD build/root/*.sh /root/
 # add run bash script
 ADD run/nobody/*.sh /home/nobody/
 
-# add pre-configured config files for minecraft
+# add pre-configured config files for forge
 ADD config/nobody/ /home/nobody/
 
 # install app
