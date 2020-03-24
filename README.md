@@ -1,6 +1,7 @@
 **Application**
 
 [Minecraft Server](https://www.minecraft.net/en-us/download/server/)
+
 [Forge Server](https://files.minecraftforge.net/)
 
 **Description**
@@ -49,7 +50,7 @@ docker run -d \
 
 **Notes**
 
-JAVA_INITIAL_HEAP_SIZE value and JAVA_MAX_HEAP_SIZE values must be a multiple of 1024 and greater than 2MB. Recommended is at least 4 gigabytes of memory, meaning 4096M.
+JAVA_INITIAL_HEAP_SIZE value and JAVA_MAX_HEAP_SIZE values must be a multiple of 1024 and greater than 2MB. Recommended is at least 4 gigabytes of memory, meaning 4096M. In case your mods are required during world generation, it is recommended to put them in /config/forge/mods beforehand. Alternatively you can add the mods after initialisation and remove the world folder manually.
 
 If you want to connect to the minecraft server console then issue the following command, use CTRL+a and then press 'd' to disconnect from the session, leaving it running.
 
