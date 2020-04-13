@@ -35,16 +35,16 @@ Please replace all user variables in the above command defined by <> with the co
 ```
 docker run -d \
     -p 25565:25565 \
-    --name=minecraftserver \
+    --name=gwyneth-forgeserver \
     -v /apps/docker/minecraftserver:/config \
     -v /etc/localtime:/etc/localtime:ro \
     -e MAX_BACKUPS=10 \
-    -e JAVA_INITIAL_HEAP_SIZE=4096M \
-    -e JAVA_MAX_HEAP_SIZE=6144M \
+    -e JAVA_INITIAL_HEAP_SIZE=2048M \
+    -e JAVA_MAX_HEAP_SIZE=4096M \
     -e JAVA_MAX_THREADS=1 \
     -e UMASK=000 \
-    -e PUID=0 \
-    -e PGID=0 \
+    -e PUID=99 \
+    -e PGID=100 \
     gwynethstark/arch-forgeserver
 ```
 
