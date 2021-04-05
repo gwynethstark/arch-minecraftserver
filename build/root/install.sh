@@ -78,6 +78,8 @@ fi
 # container perms
 ####
 
+mkdir -p "/srv/forge-1.12.2"
+
 # define comma separated list of paths 
 install_paths="/srv/forge-1.12.2,/home/nobody"
 
