@@ -73,13 +73,13 @@ fi
 # rcurl.sh -o "/tmp/minecraft_server.jar" "${minecraft_java_url}"
 
 # move minecraft java server
-mkdir -p "/srv/forge-1.12.2" && mv "/tmp/forge-1.12.2.jar" "/srv/forge-1.12.2/"
+# mkdir -p "/srv/forge-1.12.2" && mv "/tmp/forge-1.12.2.jar" "/srv/forge-1.12.2/"
 
 # container perms
 ####
 
 # define comma separated list of paths 
-install_paths="/srv/minecraft,/home/nobody"
+install_paths="/srv/forge-1.12.2,/home/nobody"
 
 # split comma separated string into list for install paths
 IFS=',' read -ra install_paths_list <<< "${install_paths}"
@@ -210,8 +210,8 @@ export CUSTOM_JAR_PATH=$(echo "${CUSTOM_JAR_PATH}" | sed -e 's~^[ \t]*~~;s~[ \t]
 if [[ ! -z "${CUSTOM_JAR_PATH}" ]]; then
 	echo "[info] CUSTOM_JAR_PATH defined as '${CUSTOM_JAR_PATH}'" | ts '%Y-%m-%d %H:%M:%.S'
 else
-	echo "[info] CUSTOM_JAR_PATH not defined,(via -e CUSTOM_JAR_PATH), defaulting to '/config/minecraft/minecraft_server.jar' (Mojang Minecraft Java)" | ts '%Y-%m-%d %H:%M:%.S'
-	export CUSTOM_JAR_PATH="/config/minecraft/minecraft_server.jar"
+	echo "[info] CUSTOM_JAR_PATH not defined,(via -e CUSTOM_JAR_PATH), defaulting to '/config/minecraft/forge-1.12.2.jar' (Mojang Minecraft Java)" | ts '%Y-%m-%d %H:%M:%.S'
+	export CUSTOM_JAR_PATH="/config/minecraft/forge-1.12.2.jar"
 fi
 
 export JAVA_VERSION=$(echo "${JAVA_VERSION}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
