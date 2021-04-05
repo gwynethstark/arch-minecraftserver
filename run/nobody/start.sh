@@ -45,8 +45,8 @@ if [ ! -f "/config/minecraft/server.properties" ]; then
 	echo "[info] Minecraft server.properties file doesnt exist, copying default installation to '/config/minecraft/'..."
 
 	mkdir -p /config/minecraft
-	if [[ -d "/srv/minecraft" ]]; then
-		cp -R /srv/minecraft/* /config/minecraft/ 2>/dev/null || true
+	if [[ -d "/srv/forge-1.12.2" ]]; then
+		cp -R /srv/forge-1.12.2/* /config/minecraft/ 2>/dev/null || true
 	fi
 
 else
