@@ -15,36 +15,71 @@ unzip /tmp/scripts-master.zip -d /tmp
 # move shell scripts to /root
 mv /tmp/scripts-master/shell/arch/docker/*.sh /usr/local/bin/
 
+# detect image arch
+####
+
+OS_ARCH=$(cat /etc/os-release | grep -P -o -m 1 "(?=^ID\=).*" | grep -P -o -m 1 "[a-z]+$")
+if [[ ! -z "${OS_ARCH}" ]]; then
+	if [[ "${OS_ARCH}" == "arch" ]]; then
+		OS_ARCH="x86-64"
+	else
+		OS_ARCH="aarch64"
+	fi
+	echo "[info] OS_ARCH defined as '${OS_ARCH}'"
+else
+	echo "[warn] Unable to identify OS_ARCH, defaulting to 'x86-64'"
+	OS_ARCH="x86-64"
+fi
+
 # pacman packages
 ####
 
 # define pacman packages
-pacman_packages="jre8-openjdk-headless screen rsync"
+pacman_packages="jre8-openjdk-headless jre11-openjdk-headless screen rsync"
 
 # install compiled packages using pacman
 if [[ ! -z "${pacman_packages}" ]]; then
 	pacman -S --needed $pacman_packages --noconfirm
 fi
 
-# define minecraft and forge version
-minecraft_version="1.15.2"
-forge_version="31.1.27-1"
-
-# download compiled forge package
-curly.sh -rc 6 -rw 10 -of "/tmp/forge-server-any.pkg.tar.xz" -url "https://github.com/gwynethstark/arch-packages/raw/master/compiled/forge-server-${minecraft_version}_${forge_version}-any.pkg.tar.xz"
-pacman -U "/tmp/forge-server-any.pkg.tar.xz" --noconfirm
-
-# config java minecraft
+# aur packages
 ####
 
-# copy config file containing env vars, sourced in from /usr/bin/forged
-cp /home/nobody/forge /etc/conf.d/forge
+# define aur packages
+aur_packages="forge-server-1.12.2"
+
+# call aur install script (arch user repo)
+source aur.sh
+
+# github packages
+####
+
+# download gotty which gives us minecraft console in web ui
+if [[ "${OS_ARCH}" == "x86-64" ]]; then
+	github.sh --install-path /usr/bin --github-owner yudai --github-repo gotty --download-assets gotty_linux_amd64.tar.gz
+elif [[ "${OS_ARCH}" == "aarch64" ]]; then
+	github.sh --install-path /usr/bin --github-owner yudai --github-repo gotty --download-assets gotty_linux_arm.tar.gz
+fi
+
+# custom
+####
+
+# determine download url for minecraft java server from minecraft.net
+# use awk to match start and end of tags
+# grep to perl regex match download url
+# minecraft_java_url=$(rcurl.sh https://www.minecraft.net/en-us/download/server | awk '/minecraft-version/,/<\/div>/' | grep -Po -m 1 'https://launcher.mojang.com[^"]+')
+
+# download compiled minecraft java server
+# rcurl.sh -o "/tmp/minecraft_server.jar" "${minecraft_java_url}"
+
+# move minecraft java server
+# mkdir -p "/srv/minecraft" && mv "/tmp/minecraft_server.jar" "/srv/minecraft/"
 
 # container perms
 ####
 
 # define comma separated list of paths 
-install_paths="/etc/conf.d,/srv,/home/nobody"
+install_paths="/srv/minecraft,/home/nobody"
 
 # split comma separated string into list for install paths
 IFS=',' read -ra install_paths_list <<< "${install_paths}"
@@ -100,13 +135,105 @@ rm /tmp/permissions_heredoc
 
 cat <<'EOF' > /tmp/envvars_heredoc
 
-export MAX_BACKUPS=$(echo "${MAX_BACKUPS}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
-if [[ ! -z "${MAX_BACKUPS}" ]]; then
-	echo "[info] MAX_BACKUPS defined as '${MAX_BACKUPS}'" | ts '%Y-%m-%d %H:%M:%.S'
+export CREATE_BACKUP_HOURS=$(echo "${CREATE_BACKUP_HOURS}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+if [[ ! -z "${CREATE_BACKUP_HOURS}" ]]; then
+	echo "[info] CREATE_BACKUP_HOURS defined as '${CREATE_BACKUP_HOURS}'" | ts '%Y-%m-%d %H:%M:%.S'
 else
-	echo "[info] MAX_BACKUPS not defined,(via -e MAX_BACKUPS), defaulting to '10'" | ts '%Y-%m-%d %H:%M:%.S'
-	export MAX_BACKUPS="10"
+	echo "[info] CREATE_BACKUP_HOURS not defined,(via -e CREATE_BACKUP_HOURS), defaulting to '12'" | ts '%Y-%m-%d %H:%M:%.S'
+	export CREATE_BACKUP_HOURS="12"
 fi
+
+export PURGE_BACKUP_DAYS=$(echo "${PURGE_BACKUP_DAYS}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+if [[ ! -z "${PURGE_BACKUP_DAYS}" ]]; then
+	echo "[info] PURGE_BACKUP_DAYS defined as '${PURGE_BACKUP_DAYS}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+	echo "[info] PURGE_BACKUP_DAYS not defined,(via -e PURGE_BACKUP_DAYS), defaulting to '14'" | ts '%Y-%m-%d %H:%M:%.S'
+	export PURGE_BACKUP_DAYS="14"
+fi
+
+export ENABLE_WEBUI_CONSOLE=$(echo "${ENABLE_WEBUI_CONSOLE}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+if [[ ! -z "${ENABLE_WEBUI_CONSOLE}" ]]; then
+	echo "[info] ENABLE_WEBUI_CONSOLE defined as '${ENABLE_WEBUI_CONSOLE}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+	echo "[info] ENABLE_WEBUI_CONSOLE not defined,(via -e ENABLE_WEBUI_CONSOLE), defaulting to 'yes'" | ts '%Y-%m-%d %H:%M:%.S'
+	export ENABLE_WEBUI_CONSOLE="yes"
+fi
+
+if [[ "${ENABLE_WEBUI_CONSOLE}" == "yes" ]]; then
+	export ENABLE_WEBUI_AUTH=$(echo "${ENABLE_WEBUI_AUTH}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+	if [[ ! -z "${ENABLE_WEBUI_AUTH}" ]]; then
+		echo "[info] ENABLE_WEBUI_AUTH defined as '${ENABLE_WEBUI_AUTH}'" | ts '%Y-%m-%d %H:%M:%.S'
+	else
+		echo "[warn] ENABLE_WEBUI_AUTH not defined (via -e ENABLE_WEBUI_AUTH), defaulting to 'yes'" | ts '%Y-%m-%d %H:%M:%.S'
+		export ENABLE_WEBUI_AUTH="yes"
+	fi
+
+	if [[ $ENABLE_WEBUI_AUTH == "yes" ]]; then
+		export WEBUI_USER=$(echo "${WEBUI_USER}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+		if [[ ! -z "${WEBUI_USER}" ]]; then
+			echo "[info] WEBUI_USER defined as '${WEBUI_USER}'" | ts '%Y-%m-%d %H:%M:%.S'
+		else
+			echo "[warn] WEBUI_USER not defined (via -e WEBUI_USER), defaulting to 'admin'" | ts '%Y-%m-%d %H:%M:%.S'
+			export WEBUI_USER="admin"
+		fi
+
+		export WEBUI_PASS=$(echo "${WEBUI_PASS}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+		if [[ ! -z "${WEBUI_PASS}" ]]; then
+			if [[ "${WEBUI_PASS}" == "minecraft" ]]; then
+				echo "[warn] WEBUI_PASS defined as '${WEBUI_PASS}' is weak, please consider using a stronger password" | ts '%Y-%m-%d %H:%M:%.S'
+			else
+				echo "[info] WEBUI_PASS defined as '${WEBUI_PASS}'" | ts '%Y-%m-%d %H:%M:%.S'
+			fi
+		else
+			WEBUI_PASS_file="/config/minecraft/security/WEBUI_PASS"
+			if [ ! -f "${WEBUI_PASS_file}" ]; then
+				# generate random password for web ui using SHA to hash the date,
+				# run through base64, and then output the top 16 characters to a file.
+				mkdir -p "/config/minecraft/security" ; chown -R nobody:users "/config/minecraft"
+				date +%s | sha256sum | base64 | head -c 16 > "${WEBUI_PASS_file}"
+			fi
+			echo "[warn] WEBUI_PASS not defined (via -e WEBUI_PASS), using randomised password (password stored in '${WEBUI_PASS_file}')" | ts '%Y-%m-%d %H:%M:%.S'
+			export WEBUI_PASS="$(cat ${WEBUI_PASS_file})"
+		fi
+	fi
+
+	export WEBUI_CONSOLE_TITLE=$(echo "${WEBUI_CONSOLE_TITLE}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+	if [[ ! -z "${WEBUI_CONSOLE_TITLE}" ]]; then
+		echo "[info] WEBUI_CONSOLE_TITLE defined as '${WEBUI_CONSOLE_TITLE}'" | ts '%Y-%m-%d %H:%M:%.S'
+	else
+		echo "[info] WEBUI_CONSOLE_TITLE not defined,(via -e WEBUI_CONSOLE_TITLE), defaulting to 'Minecraft Java'" | ts '%Y-%m-%d %H:%M:%.S'
+		export WEBUI_CONSOLE_TITLE="Minecraft Java"
+	fi
+fi
+
+export CUSTOM_JAR_PATH=$(echo "${CUSTOM_JAR_PATH}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+if [[ ! -z "${CUSTOM_JAR_PATH}" ]]; then
+	echo "[info] CUSTOM_JAR_PATH defined as '${CUSTOM_JAR_PATH}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+	echo "[info] CUSTOM_JAR_PATH not defined,(via -e CUSTOM_JAR_PATH), defaulting to '/config/minecraft/minecraft_server.jar' (Mojang Minecraft Java)" | ts '%Y-%m-%d %H:%M:%.S'
+	export CUSTOM_JAR_PATH="/config/minecraft/minecraft_server.jar"
+fi
+
+export JAVA_VERSION=$(echo "${JAVA_VERSION}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
+if [[ ! -z "${JAVA_VERSION}" ]]; then
+	echo "[info] JAVA_VERSION defined as '${JAVA_VERSION}'" | ts '%Y-%m-%d %H:%M:%.S'
+else
+	echo "[info] JAVA_VERSION not defined,(via -e JAVA_VERSION), defaulting to '8'" | ts '%Y-%m-%d %H:%M:%.S'
+	export JAVA_VERSION="8"
+fi
+
+if [[ "${JAVA_VERSION}" == "8" ]]; then
+	ln -fs /usr/lib/jvm/java-8-openjdk/jre/bin/java /usr/bin/java
+	archlinux-java set java-8-openjdk/jre
+elif [[ "${JAVA_VERSION}" == "11" ]]; then
+	ln -fs /usr/lib/jvm/java-11-openjdk/bin/java /usr/bin/java
+	archlinux-java set java-11-openjdk
+else
+	echo "[warn] Java version '${JAVA_VERSION}' not installed, defaulting to Java version 8" | ts '%Y-%m-%d %H:%M:%.S'
+	ln -fs /usr/lib/jvm/java-8-openjdk/jre/bin/java /usr/bin/java
+	archlinux-java set java-8-openjdk/jre
+fi
+export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")
 
 export JAVA_INITIAL_HEAP_SIZE=$(echo "${JAVA_INITIAL_HEAP_SIZE}" | sed -e 's~^[ \t]*~~;s~[ \t]*$~~')
 if [[ ! -z "${JAVA_INITIAL_HEAP_SIZE}" ]]; then
