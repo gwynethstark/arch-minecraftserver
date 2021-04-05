@@ -73,7 +73,7 @@ fi
 # rcurl.sh -o "/tmp/minecraft_server.jar" "${minecraft_java_url}"
 
 # move minecraft java server
-# mkdir -p "/srv/minecraft" && mv "/tmp/minecraft_server.jar" "/srv/minecraft/"
+mkdir -p "/srv/minecraft" && mv "/tmp/forge.jar" "/srv/minecraft/"
 
 # container perms
 ####
