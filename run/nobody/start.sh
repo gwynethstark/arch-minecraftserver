@@ -34,7 +34,7 @@ function start_minecraft() {
 
 	# run screen attached to minecraft (daemonized, non-blocking) to allow users to run commands in minecraft console
 	echo "[info] Starting Minecraft Java process..."
-	screen -L -Logfile '/config/minecraft/logs/screen.log' -d -S forged -m bash -c "cd /config/minecraft && java -Xms${JAVA_INITIAL_HEAP_SIZE} -Xmx${JAVA_MAX_HEAP_SIZE} -XX:ParallelGCThreads=${JAVA_MAX_THREADS} -jar ${CUSTOM_JAR_PATH} nogui"
+	screen -L -Logfile '/config/minecraft/logs/screen.log' -d -S forge.jar -m bash -c "cd /config/minecraft && java -Xms${JAVA_INITIAL_HEAP_SIZE} -Xmx${JAVA_MAX_HEAP_SIZE} -XX:ParallelGCThreads=${JAVA_MAX_THREADS} -jar ${CUSTOM_JAR_PATH} nogui"
 	echo "[info] Minecraft Java process is running"
 
 }
@@ -57,7 +57,7 @@ else
 	# -t = keep source modification times for destination files/folders
 	# -p = keep source permissions for destination files/folders
 	echo "[info] Minecraft folder '/config/minecraft' already exists, rsyncing newer files..."
-	rsync -rltp --exclude 'world' --exclude '/server.properties' --exclude '/*.json' /srv/minecraft/ /config/minecraft
+	rsync -rltp --exclude 'world' --exclude '/server.properties' --exclude '/*.json' /srv/forge-1.12.2/ /config/minecraft
 
 fi
 
