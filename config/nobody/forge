@@ -5,7 +5,7 @@
 
 # General parameters
 SERVER_ROOT="/config/forge"
-BACKUP_DEST="/config/mforge/backup"
+BACKUP_DEST="/config/forge/backup"
 BACKUP_PATHS="world" # World paths separated by spaces relative to SERVER_ROOT
 KEEP_BACKUPS="${MAX_BACKUPS}"
 GAME_USER="nobody"

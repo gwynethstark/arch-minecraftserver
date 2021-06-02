@@ -46,7 +46,7 @@ fi
 ####
 
 # define aur packages
-aur_packages="forge-server-1.12.2"
+aur_packages="forge-server"
 
 # call aur install script (arch user repo)
 source aur.sh
@@ -78,10 +78,10 @@ fi
 # container perms
 ####
 
-mkdir -p "/srv/forge-1.12.2"
+mkdir -p "/srv/forge"
 
 # define comma separated list of paths 
-install_paths="/srv/forge-1.12.2,/home/nobody"
+install_paths="/srv/forge,/home/nobody"
 
 # split comma separated string into list for install paths
 IFS=',' read -ra install_paths_list <<< "${install_paths}"
